@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="ja" data-theme="light">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>三角関数計算機 Pro</title>
+<style>
+:root {
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --primary-light: #dbeafe;
+  --secondary: #64748b;
+  --accent: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f97316;
+  --info: #3b82f6;
+
+  --bg: #f1f5f9;
+  --bg2: #ffffff;
+  --bg3: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+  --text: #0f172a;
+  --text2: #475569;
+  --text3: #94a3b8;
+  --shadow: 0 4px 24px rgba(15,23,42,0.08);
+  --shadow-sm: 0 1px 6px rgba(15,23,42,0.06);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 5px;
+}
+
+[data-theme="dark"] {
+  --bg: #0f172a;
+  --bg2: #1e293b;
+  --bg3: #0f172a;
+  --surface: #1e293b;
+  --border: #334155;
+  --text: #f1f5f9;
+  --text2: #94a3b8;
+  --text3: #475569;
+  --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --shadow-sm: 0 1px 6px rgba(0,0,0,0.3);
+  --primary-light: #1e3a8a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  font-family: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+/* ─── HEADER ─── */
+.header {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #3b82f6 100%);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 16px rgba(37,99,235,0.4);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-icon {
+  width: 40px; height: 40px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+
+.header h1 {
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.header-sub {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.78rem;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.theme-toggle {
+  width: 44px; height: 24px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.3s;
+}
+
+.theme-toggle::after {
+  content: '';
+  position: absolute;
+  width: 18px; height: 18px;
+  background: white;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  transition: left 0.3s;
+}
+
+[data-theme="dark"] .theme-toggle { background: rgba(255,255,255,0.4); }
+[data-theme="dark"] .theme-toggle::after { left: 23px; }
+
+.theme-label { color: rgba(255,255,255,0.85); font-size: 0.78rem; }
+
+/* ─── LAYOUT ─── */
+.container { max-width: 1400px; margin: 0 auto; padding: 20px 16px; }
+
+.main-content {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* ─── PANELS ─── */
+.panel {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.panel-header {
+  padding: 14px 18px 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+  margin-bottom: 0;
+}
+
+.panel-body { padding: 16px 18px; }
+
+/* ─── LEFT COLUMN ─── */
+.left-col {
+  flex: 1 1 660px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── CANVAS ─── */
+.canvas-wrap {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.canvas-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg3);
+  flex-wrap: wrap;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  cursor: crosshair;
+}
+
+.canvas-hint {
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  color: var(--text3);
+  background: var(--bg3);
+  border-top: 1px solid var(--border);
+}
+
+/* ─── TOOLBAR BUTTONS ─── */
+.tool-btn {
+  padding: 5px 12px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.tool-btn:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+.tool-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* ─── HISTORY ─── */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--text2);
+  transition: all 0.15s;
+  gap: 8px;
+}
+.history-item:hover { background: var(--primary-light); border-color: var(--primary); color: var(--text); }
+
+.history-item .h-angle { font-weight: 700; color: var(--primary); min-width: 55px; }
+.history-item .h-vals { flex: 1; font-size: 0.75rem; color: var(--text3); }
+.history-del {
+  width: 18px; height: 18px;
+  border: none; background: none;
+  color: var(--text3); cursor: pointer;
+  font-size: 14px; line-height: 1;
+  border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+}
+.history-del:hover { background: var(--danger); color: white; }
+
+.history-empty { color: var(--text3); font-size: 0.82rem; text-align: center; padding: 16px; }
+
+/* ─── RIGHT COLUMN ─── */
+.right-col {
+  flex: 0 0 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ─── TABS ─── */
+.tab-row {
+  display: flex;
+  border-bottom: 2px solid var(--border);
+  gap: 0;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 8px 13px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text2);
+  white-space: nowrap;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+.tab:hover { color: var(--primary); }
+.tab.active { border-bottom-color: var(--primary); color: var(--primary); }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ─── INPUTS ─── */
+.input-section { padding-top: 12px; }
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.input-field { flex: 1; }
+.input-field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+
+.input-wrap { position: relative; }
+
+input[type=number] {
+  width: 100%;
+  padding: 9px 36px 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  background: var(--bg3);
+  color: var(--text);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.3s;
+}
+input[type=number]:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+  background: var(--surface);
+}
+[data-theme="dark"] input[type=number] { background: #0f172a; color: var(--text); }
+
+.unit-badge {
+  position: absolute;
+  right: 10px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.78rem;
+  color: var(--text3);
+  pointer-events: none;
+}
+
+/* ─── SLIDER ─── */
+.slider-section { margin-top: 4px; }
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text2);
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+.slider-val { color: var(--primary); font-weight: 700; }
+
+input[type=range] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(to right, var(--primary) 0%, var(--primary) var(--pct, 0%), var(--border) var(--pct, 0%), var(--border) 100%);
+  outline: none;
+  cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--primary);
+  border: 2px solid white;
+  box-shadow: 0 1px 6px rgba(37,99,235,0.4);
+}
+
+/* ─── PRESETS ─── */
+.presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.preset-btn {
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text2);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.preset-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* ─── TOGGLES ROW ─── */
+.toggles-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text2);
+}
+.toggle-group label { cursor: pointer; }
+
+.mini-toggle {
+  display: flex;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px;
+}
+.mini-toggle button {
+  padding: 3px 10px;
+  border: none;
+  border-radius: 16px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  color: var(--text2);
+  transition: all 0.2s;
+}
+.mini-toggle button.active { background: var(--primary); color: white; }
+
+.precision-select {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+[data-theme="dark"] .precision-select { background: #1e293b; color: var(--text); }
+
+/* ─── ACTION BUTTONS ─── */
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.btn {
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  border: none;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--primary); color: white; flex: 1; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary { background: var(--secondary); color: white; }
+.btn-secondary:hover { background: #475569; }
+.btn-outline {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  color: var(--text2);
+}
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+.btn-danger { background: var(--danger); color: white; }
+.btn-danger:hover { background: #dc2626; }
+
+/* ─── RESULTS ─── */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.res-card {
+  background: var(--bg3);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+  transition: background 0.3s;
+}
+.res-card.highlight { border-color: currentColor; }
+
+.res-label {
+  font-size: 0.7rem;
+  color: var(--text3);
+  font-weight: 600;
+  margin-bottom: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.res-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  word-break: break-all;
+}
+.res-sub { font-size: 0.68rem; color: var(--text3); margin-top: 1px; }
+
+.res-angle .res-value { color: #2563eb; }
+.res-r .res-value { color: #7c3aed; }
+.res-x .res-value { color: #dc2626; }
+.res-y .res-value { color: #f97316; }
+.res-sin .res-value { color: #059669; }
+.res-cos .res-value { color: #0891b2; }
+.res-tan .res-value { color: #d97706; }
+
+/* ─── FORMULA PANEL ─── */
+.formula-box {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 0.82rem;
+  color: var(--text2);
+  line-height: 1.8;
+}
+.formula-box .f-title { font-weight: 700; color: var(--primary); margin-bottom: 6px; font-size: 0.8rem; }
+.formula-box .f-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.formula-box .f-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: var(--text);
+}
+
+/* ─── QUADRANT ─── */
+.quadrant-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
+/* ─── COPY TOAST ─── */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--text);
+  color: var(--bg);
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  z-index: 9999;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg3); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 900px) {
+  .main-content { flex-direction: column; }
+  .right-col { flex: none; width: 100%; }
+  .left-col { flex: none; width: 100%; }
+  .results-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .header h1 { font-size: 1.1rem; }
+  .results-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ─── SECTION DIVIDER ─── */
+.divider {
+  height: 1px;
+  background: var(--border);
+  margin: 10px 0;
+}
+
+/* ─── RESULT COPY ROW ─── */
+.result-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+/* ─── CAD MEASUREMENT ─── */
+.cad-toolbar-sep {
+  width: 1px;
+  background: var(--border);
+  margin: 0 4px;
+  align-self: stretch;
+}
+
+.tool-btn.cad-active {
+  background: #6366f1;
+  color: white;
+  border-color: #6366f1;
+}
+
+.cad-panel-header-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cad-scale-wrap {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: var(--text2);
+  margin-left: auto;
+}
+
+.cad-scale-wrap input {
+  width: 60px;
+  padding: 3px 6px;
+  font-size: 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg3);
+  color: var(--text);
+  text-align: right;
+}
+
+.cad-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.cad-table th {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 700;
+  padding: 5px 8px;
+  text-align: right;
+  border: 1px solid var(--border);
+  font-size: 0.75rem;
+}
+
+.cad-table th:first-child { text-align: center; }
+
+.cad-table td {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  text-align: right;
+  font-family: monospace;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+
+.cad-table td:first-child {
+  text-align: center;
+  font-weight: 700;
+  background: var(--bg3);
+}
+
+.cad-table tr:hover td { background: var(--primary-light); }
+
+.cad-table .del-pt {
+  background: none;
+  border: none;
+  color: var(--text3);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 3px;
+}
+.cad-table .del-pt:hover { color: var(--danger); }
+
+.cad-total-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: var(--bg3);
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border);
+  font-size: 0.82rem;
+  color: var(--text2);
+  flex-wrap: wrap;
+}
+
+.cad-total-row strong { color: var(--primary); }
+
+.cad-empty {
+  text-align: center;
+  color: var(--text3);
+  font-size: 0.82rem;
+  padding: 14px;
+}
+
+.cad-hint-bar {
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  color: white;
+  background: #6366f1;
+  border-top: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-title">
+    <div class="header-icon">📐</div>
+    <div>
+      <h1>三角関数計算機 Pro</h1>
+      <div class="header-sub">角度・辺の長さ・三角関数値を瞬時に計算・可視化</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <span class="theme-label" id="themeLabel">☀️</span>
+    <button class="theme-toggle" id="themeToggle" title="ダークモード切替"></button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="main-content">
+
+    <!-- ───── LEFT: Canvas + History ───── -->
+    <div class="left-col">
+
+      <div class="canvas-wrap panel">
+        <div class="canvas-toolbar">
+          <button class="tool-btn" id="unitCircleBtn">⭕ 単位円</button>
+          <button class="tool-btn active" id="gridBtn"># グリッド</button>
+          <button class="tool-btn" id="fillBtn">🎨 塗りつぶし</button>
+          <button class="tool-btn" id="animBtn">▶ アニメーション</button>
+          <div class="cad-toolbar-sep"></div>
+          <button class="tool-btn" id="cadBtn" title="点を打って寸法を計測するCADモード">📍 点計測</button>
+          <button class="tool-btn" id="cadUndoBtn" title="最後の点を削除" style="display:none">↩ 戻す</button>
+          <button class="tool-btn" id="cadClearBtn" title="全点消去" style="display:none">🗑 全消去</button>
+          <div style="flex:1"></div>
+          <button class="tool-btn" id="saveImgBtn">💾 PNG保存</button>
+        </div>
+        <canvas id="mainCanvas" width="900" height="600"></canvas>
+        <div class="canvas-hint" id="canvasHint">📌 Canvasをクリック・ドラッグすると角度をインタラクティブに設定できます</div>
+      </div>
+
+      <!-- CAD Panel -->
+      <div class="panel" id="cadPanel" style="display:none">
+        <div class="panel-header">
+          <span>📐 点計測データ</span>
+          <div class="cad-scale-wrap">
+            <span id="cadScaleInfo" title="三角形の計算結果のRに自動連動">📐 計算に自動連動</span>
+          </div>
+        </div>
+        <div class="panel-body">
+          <!-- Point coordinates table -->
+          <div id="cadPointsWrap">
+            <div class="cad-empty">📍 キャンバスをクリックして点を打ってください</div>
+          </div>
+          <!-- Dimension table -->
+          <div id="cadDimsWrap" style="margin-top:10px;display:none">
+            <table class="cad-table" id="cadDimTable">
+              <thead>
+                <tr>
+                  <th>区間</th>
+                  <th>距離</th>
+                  <th>角度</th>
+                  <th>ΔX</th>
+                  <th>ΔY</th>
+                </tr>
+              </thead>
+              <tbody id="cadDimBody"></tbody>
+            </table>
+          </div>
+          <!-- Totals -->
+          <div class="cad-total-row" id="cadTotals" style="display:none"></div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="panel">
+        <div class="panel-header">
+          🕘 計算履歴
+          <div style="flex:1"></div>
+          <button class="tool-btn" id="clearHistoryBtn" style="font-size:0.75rem;padding:3px 8px;">全消去</button>
+        </div>
+        <div class="panel-body">
+          <div class="history-list" id="historyList">
+            <div class="history-empty">履歴はありません</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ───── RIGHT: Controls + Results ───── -->
+    <div class="right-col">
+
+      <!-- Input Panel -->
+      <div class="panel">
+        <div class="panel-header">⌨️ 入力パラメータ</div>
+        <div class="panel-body">
+
+          <!-- Tabs -->
+          <div class="tab-row" id="tabRow">
+            <div class="tab active" data-tab="tab-ar">角度+R</div>
+            <div class="tab" data-tab="tab-ax">角度+X</div>
+            <div class="tab" data-tab="tab-ay">角度+Y</div>
+            <div class="tab" data-tab="tab-xy">X+Y</div>
+            <div class="tab" data-tab="tab-rx">R+X</div>
+            <div class="tab" data-tab="tab-ry">R+Y</div>
+          </div>
+
+          <!-- Tab: 角度+R -->
+          <div class="tab-content active input-section" id="tab-ar">
+            <div class="input-row">
+              <div class="input-field">
+                <label for="i_angle_ar">角度</label>
+                <div class="input-wrap">
+                  <input id="i_angle_ar" type="number" placeholder="例: 30" step="any">
+                  <span class="unit-badge" id="ub_angle_ar">°</span>
+                </div>
+              </div>
+              <div class="input-field">
+                <label for="i_r_ar">半径 R</label>
+                <div class="input-wrap">
+                  <input id="i_r_ar" type="number" placeholder="例: 100" step="any">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: 角度+X -->
+          <div class="tab-content input-section" id="tab-ax">
+            <div class="input-row">
+              <div class="input-field">
+                <label for="i_angle_ax">角度</label>
+                <div class="input-wrap">
+                  <input id="i_angle_ax" type="number" placeholder="例: 30" step="any">
+                  <span class="unit-badge" id="ub_angle_ax">°</span>
+                </div>
+              </div>
+              <div class="input-field">
+                <label for="i_x_ax">X値</label>
+                <div class="input-wrap">
+                  <input id="i_x_ax" type="number" placeholder="例: 50" step="any">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: 角度+Y -->
+          <div class="tab-content input-section" id="tab-ay">
+            <div class="input-row">
+              <div class="input-field">
+                <label for="i_angle_ay">角度</label>
+                <div class="input-wrap">
+                  <input id="i_angle_ay" type="number" placeholder="例: 30" step="any">
+                  <span class="unit-badge" id="ub_angle_ay">°</span>
+                </div>
+              </div>
+              <div class="input-field">
+                <label for="i_y_ay">Y値</label>
+                <div class="input-wrap">
+                  <input id="i_y_ay" type="number" placeholder="例: 50" step="any">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: X+Y -->
+          <div class="tab-content input-section" id="tab-xy">
+            <div class="input-row">
+              <div class="input-field">
+                <label for="i_x_xy">X値</label>
+                <div class="input-wrap">
+                  <input id="i_x_xy" type="number" placeholder="例: 50" step="any">
+                </div>
+              </div>
+              <div class="input-field">
+                <label for="i_y_xy">Y値</label>
+                <div class="input-wrap">
+                  <input id="i_y_xy" type="number" placeholder="例: 50" step="any">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: R+X -->
+          <div class="tab-content input-section" id="tab-rx">
+            <div class="input-row">
+              <div class="input-field">
+                <label for="i_r_rx">半径 R</label>
+                <div class="input-wrap">
+                  <input id="i_r_rx" type="number" placeholder="例: 100" step="any">
+                </div>
+              </div>
+              <div class="input-field">
+                <label for="i_x_rx">X値</label>
+                <div class="input-wrap">
+                  <input id="i_x_rx" type="number" placeholder="例: 50" step="any">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: R+Y -->
+          <div class="tab-content input-section" id="tab-ry">
+            <div class="input-row">
+              <div class="input-field">
+                <label for="i_r_ry">半径 R</label>
+                <div class="input-wrap">
+                  <input id="i_r_ry" type="number" placeholder="例: 100" step="any">
+                </div>
+              </div>
+              <div class="input-field">
+                <label for="i_y_ry">Y値</label>
+                <div class="input-wrap">
+                  <input id="i_y_ry" type="number" placeholder="例: 50" step="any">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Angle Slider -->
+          <div class="slider-section">
+            <div class="slider-label">
+              <span>🎚 角度スライダー</span>
+              <span class="slider-val" id="sliderDisplay">0°</span>
+            </div>
+            <input type="range" id="angleSlider" min="0" max="360" value="0" step="0.5">
+          </div>
+
+          <!-- Preset Buttons -->
+          <div class="presets" id="presets">
+            <span style="font-size:0.75rem;color:var(--text3);align-self:center;">プリセット:</span>
+            <button class="preset-btn" data-angle="0">0°</button>
+            <button class="preset-btn" data-angle="30">30°</button>
+            <button class="preset-btn" data-angle="45">45°</button>
+            <button class="preset-btn" data-angle="60">60°</button>
+            <button class="preset-btn" data-angle="90">90°</button>
+            <button class="preset-btn" data-angle="120">120°</button>
+            <button class="preset-btn" data-angle="135">135°</button>
+            <button class="preset-btn" data-angle="150">150°</button>
+            <button class="preset-btn" data-angle="180">180°</button>
+            <button class="preset-btn" data-angle="270">270°</button>
+          </div>
+
+          <div class="divider"></div>
+
+          <!-- Toggles -->
+          <div class="toggles-row">
+            <div class="toggle-group">
+              <span>入力単位:</span>
+              <div class="mini-toggle" id="unitToggle">
+                <button class="active" data-unit="deg">度</button>
+                <button data-unit="rad">rad</button>
+              </div>
+            </div>
+            <div class="toggle-group">
+              <span>精度:</span>
+              <select class="precision-select" id="precisionSel">
+                <option value="2">2桁</option>
+                <option value="4" selected>4桁</option>
+                <option value="6">6桁</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="btn-row">
+            <button class="btn btn-primary" id="calcBtn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+              計算実行
+            </button>
+            <button class="btn btn-secondary" id="rotateBtn" title="180°回転">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+              180°
+            </button>
+            <button class="btn btn-outline" id="resetBtn">↺ リセット</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Results Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          📊 計算結果
+          <div style="flex:1"></div>
+          <button class="tool-btn" id="copyResultsBtn" style="font-size:0.75rem;padding:3px 8px;">📋 コピー</button>
+        </div>
+        <div class="panel-body">
+          <div id="quadrantBadge" style="display:none" class="quadrant-badge"></div>
+
+          <div class="results-grid" style="margin-top:10px">
+            <div class="res-card res-angle">
+              <div class="res-label">角度 θ</div>
+              <div class="res-value" id="r_angle">—</div>
+              <div class="res-sub" id="r_angle_rad">—</div>
+            </div>
+            <div class="res-card res-angle">
+              <div class="res-label">余角 (90°−θ)</div>
+              <div class="res-value" id="r_comp">—</div>
+              <div class="res-sub" id="r_comp_rad">—</div>
+            </div>
+            <div class="res-card res-r">
+              <div class="res-label">半径 R</div>
+              <div class="res-value" id="r_R">—</div>
+            </div>
+            <div class="res-card res-x">
+              <div class="res-label">X (cos側)</div>
+              <div class="res-value" id="r_X">—</div>
+            </div>
+            <div class="res-card res-y">
+              <div class="res-label">Y (sin側)</div>
+              <div class="res-value" id="r_Y">—</div>
+            </div>
+            <div class="res-card res-sin">
+              <div class="res-label">sin θ</div>
+              <div class="res-value" id="r_sin">—</div>
+            </div>
+            <div class="res-card res-cos">
+              <div class="res-label">cos θ</div>
+              <div class="res-value" id="r_cos">—</div>
+            </div>
+            <div class="res-card res-tan">
+              <div class="res-label">tan θ</div>
+              <div class="res-value" id="r_tan">—</div>
+            </div>
+            <div class="res-card">
+              <div class="res-label">cot θ</div>
+              <div class="res-value" id="r_cot" style="color:#8b5cf6">—</div>
+            </div>
+            <div class="res-card">
+              <div class="res-label">sec θ</div>
+              <div class="res-value" id="r_sec" style="color:#be185d">—</div>
+            </div>
+            <div class="res-card">
+              <div class="res-label">csc θ</div>
+              <div class="res-value" id="r_csc" style="color:#065f46">—</div>
+            </div>
+            <div class="res-card">
+              <div class="res-label">tan 余角</div>
+              <div class="res-value" id="r_tan_comp" style="color:#92400e">—</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formula Panel -->
+      <div class="panel" id="formulaPanel" style="display:none">
+        <div class="panel-header">📐 使用した計算式</div>
+        <div class="panel-body">
+          <div class="formula-box" id="formulaBox"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================================================================
+   STATE
+================================================================ */
+const S = {
+  angleDeg: 0,
+  R: 0, X: 0, Y: 0,
+  hasResult: false,
+  rotation: 0,
+  unitDeg: true,       // true=度, false=rad
+  precision: 4,
+  showUnitCircle: false,
+  showGrid: true,
+  showFill: false,
+  animating: false,
+  animTarget: 0,
+  animFrom: 0,
+  animStart: 0,
+  dark: false,
+  activeTab: 'tab-ar',
+};
+
+/* ================================================================
+   CANVAS ELEMENT (テーマIIFEより前に定義してdrawAllを安全に呼べるようにする)
+================================================================ */
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+const CW = () => canvas.width;
+const CH = () => canvas.height;
+const pivot = () => ({ x: CW()/2, y: CH()/2 });
+
+/* ================================================================
+   THEME
+================================================================ */
+const themeToggle = document.getElementById('themeToggle');
+const themeLabel  = document.getElementById('themeLabel');
+
+function applyTheme(dark) {
+  S.dark = dark;
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  themeLabel.textContent = dark ? '🌙' : '☀️';
+  try { localStorage.setItem('theme', dark ? 'dark' : 'light'); } catch(e) {}
+  drawAll();
+}
+themeToggle.addEventListener('click', () => applyTheme(!S.dark));
+(function() {
+  try {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') applyTheme(true);
+  } catch(e) {}
+})();
+
+/* ================================================================
+   POLYFILLS
+================================================================ */
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    const radius = Math.min(typeof r === 'number' ? r : 0, Math.min(w, h) / 2);
+    this.moveTo(x + radius, y);
+    this.lineTo(x + w - radius, y);
+    this.arcTo(x + w, y, x + w, y + h, radius);
+    this.lineTo(x + w, y + h - radius);
+    this.arcTo(x + w, y + h, x, y + h, radius);
+    this.lineTo(x + radius, y + h);
+    this.arcTo(x, y + h, x, y, radius);
+    this.lineTo(x, y + radius);
+    this.arcTo(x, y, x + w, y, radius);
+    this.closePath();
+  };
+}
+
+/* ================================================================
+   CANVAS FUNCTIONS
+================================================================ */
+function getColors() {
+  return {
+    bg:     S.dark ? '#1e293b' : '#ffffff',
+    axis:   S.dark ? '#334155' : '#e2e8f0',
+    grid:   S.dark ? '#1e3a5f' : '#eff6ff',
+    tri:    S.dark ? '#f1f5f9' : '#111827',
+    fill:   S.dark ? 'rgba(37,99,235,0.15)' : 'rgba(37,99,235,0.08)',
+    dimX:   '#ef4444',
+    dimY:   '#f97316',
+    dimR:   '#7c3aed',
+    arc:    '#2563eb',
+    arcTop: '#9333ea',
+    circle: S.dark ? 'rgba(16,185,129,0.35)' : 'rgba(16,185,129,0.25)',
+    circleStroke: '#10b981',
+    text:   S.dark ? '#f1f5f9' : '#0f172a',
+    text2:  S.dark ? '#94a3b8' : '#64748b',
+    quad:   S.dark ? 'rgba(148,163,184,0.2)' : 'rgba(100,116,139,0.08)',
+  };
+}
+
+function drawAll() {
+  const c = getColors();
+  const p = pivot();
+  ctx.clearRect(0, 0, CW(), CH());
+  ctx.fillStyle = c.bg;
+  ctx.fillRect(0, 0, CW(), CH());
+
+  const maxR = Math.min(CW(), CH()) * 0.40;
+
+  if (S.showGrid) drawGrid(c, p);
+  drawAxes(c, p);
+  if (S.showUnitCircle) drawUnitCircle(c, p, maxR);
+  drawQuadrantLabels(c, p, maxR);
+  if (S.hasResult) drawTriangle(c, p, maxR);
+  if (CAD.active || CAD.points.length > 0) drawCadLayer(c, p);
+}
+
+function drawGrid(c, p) {
+  const step = 60;
+  ctx.strokeStyle = c.grid;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = p.x % step; x < CW(); x += step) {
+    ctx.moveTo(x, 0); ctx.lineTo(x, CH());
+  }
+  for (let y = p.y % step; y < CH(); y += step) {
+    ctx.moveTo(0, y); ctx.lineTo(CW(), y);
+  }
+  ctx.stroke();
+}
+
+function drawAxes(c, p) {
+  ctx.strokeStyle = c.axis;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0, p.y); ctx.lineTo(CW(), p.y);
+  ctx.moveTo(p.x, 0); ctx.lineTo(p.x, CH());
+  ctx.stroke();
+
+  ctx.fillStyle = c.text2;
+  ctx.font = 'bold 13px sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('X', CW() - 18, p.y - 14);
+  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText('Y', p.x + 12, 8);
+
+  // origin
+  ctx.fillStyle = c.text2;
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'right'; ctx.textBaseline = 'top';
+  ctx.fillText('O', p.x - 4, p.y + 4);
+}
+
+function drawUnitCircle(c, p, maxR) {
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, maxR, 0, Math.PI * 2);
+  ctx.strokeStyle = c.circleStroke;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6, 4]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = c.circle;
+  ctx.fill();
+
+  ctx.fillStyle = c.circleStroke;
+  ctx.font = '11px sans-serif';
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillText('単位円', p.x + maxR + 6, p.y - 10);
+}
+
+function drawQuadrantLabels(c, p, maxR) {
+  const off = maxR * 0.55;
+  ctx.fillStyle = c.text2;
+  ctx.font = 'bold 15px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const labels = [['Ⅰ', off, -off], ['Ⅱ', -off, -off], ['Ⅲ', -off, off], ['Ⅳ', off, off]];
+  labels.forEach(([l, dx, dy]) => {
+    ctx.fillStyle = c.quad;
+    ctx.fillRect(p.x + dx - 14, p.y + dy - 12, 28, 24);
+    ctx.fillStyle = c.text2;
+    ctx.fillText(l, p.x + dx, p.y + dy);
+  });
+}
+
+function drawTriangle(c, p, maxR) {
+  const a = (S.angleDeg * Math.PI / 180) + S.rotation;
+
+  const pxR = S.R > 0 ? Math.min(S.R, 1) : 1;
+  const scaledR = maxR * 0.82;
+
+  const endX = p.x + scaledR * Math.cos(-a);  // canvas Y is inverted
+  const endY = p.y + scaledR * Math.sin(-a);
+  const baseX = p.x + scaledR * Math.cos(-a);
+  const baseY = p.y;
+
+  // Triangle fill
+  if (S.showFill) {
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(endX, p.y);
+    ctx.lineTo(endX, endY);
+    ctx.closePath();
+    ctx.fillStyle = c.fill;
+    ctx.fill();
+  }
+
+  // Hypotenuse (R line)
+  drawArrowLine(ctx, p.x, p.y, endX, endY, c.dimR, 2.5);
+
+  // X component
+  drawArrowLine(ctx, p.x, p.y, endX, p.y, c.dimX, 2);
+
+  // Y component
+  drawArrowLine(ctx, endX, p.y, endX, endY, c.dimY, 2);
+
+  // Right angle marker
+  const raSize = 12;
+  const xSign = endX >= p.x ? 1 : -1;
+  const ySign = endY <= p.y ? -1 : 1;
+  ctx.beginPath();
+  ctx.moveTo(endX - raSize * xSign, p.y);
+  ctx.lineTo(endX - raSize * xSign, p.y + raSize * ySign);
+  ctx.lineTo(endX, p.y + raSize * ySign);
+  ctx.strokeStyle = c.text2;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Angle arc at origin
+  const arcR = 40;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, arcR, 0, -a, a > 0);
+  ctx.strokeStyle = c.arc;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Labels
+  ctx.font = 'bold 14px sans-serif';
+  labelAt(ctx, `θ=${S.angleDeg.toFixed(1)}°`, p.x + arcR * Math.cos(-a/2) + 5, p.y + arcR * Math.sin(-a/2) - 10, c.arc);
+
+  const midRx = (p.x + endX) / 2;
+  const midRy = (p.y + endY) / 2;
+  labelAt(ctx, `R=${fmt(S.R)}`, midRx - 30, midRy - 10, c.dimR);
+  labelAt(ctx, `X=${fmt(S.X)}`, (p.x + endX) / 2, p.y + 22, c.dimX);
+  labelAt(ctx, `Y=${fmt(S.Y)}`, endX + (endX > p.x ? 8 : -8), (p.y + endY) / 2, c.dimY);
+
+  // Endpoint dot
+  ctx.beginPath();
+  ctx.arc(endX, endY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = c.dimR;
+  ctx.fill();
+  ctx.strokeStyle = c.bg;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function drawArrowLine(ctx, x1, y1, x2, y2, color, lw) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len = Math.sqrt(dx*dx + dy*dy);
+  if (len < 2) return;
+  const angle = Math.atan2(dy, dx);
+  const hl = 10, ha = Math.PI / 7;
+
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = lw;
+  ctx.stroke();
+
+  // arrowhead at end
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - hl*Math.cos(angle-ha), y2 - hl*Math.sin(angle-ha));
+  ctx.lineTo(x2 - hl*Math.cos(angle+ha), y2 - hl*Math.sin(angle+ha));
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function labelAt(ctx, text, x, y, color) {
+  ctx.save();
+  ctx.font = 'bold 13px sans-serif';
+  const m = ctx.measureText(text);
+  const pad = 4, h = 16;
+  ctx.fillStyle = S.dark ? 'rgba(30,41,59,0.85)' : 'rgba(255,255,255,0.88)';
+  ctx.strokeStyle = color + '44';
+  ctx.lineWidth = 1;
+  const rx = x - pad, ry = y - h/2 - pad, rw = m.width + pad*2, rh = h + pad*2;
+  ctx.beginPath();
+  ctx.roundRect(rx, ry, rw, rh, 4);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign = 'left';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+/* ================================================================
+   CANVAS INTERACTIVE
+================================================================ */
+let isDragging = false;
+
+function canvasAngle(e) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = CW() / rect.width;
+  const scaleY = CH() / rect.height;
+  const p = pivot();
+  let cx, cy;
+  if (e.touches) {
+    cx = (e.touches[0].clientX - rect.left) * scaleX;
+    cy = (e.touches[0].clientY - rect.top)  * scaleY;
+  } else {
+    cx = (e.clientX - rect.left) * scaleX;
+    cy = (e.clientY - rect.top)  * scaleY;
+  }
+  const dx = cx - p.x, dy = -(cy - p.y);
+  let deg = Math.atan2(dy, dx) * 180 / Math.PI;
+  if (deg < 0) deg += 360;
+  return deg;
+}
+
+function handleCanvasInteract(e) {
+  e.preventDefault();
+  const deg = canvasAngle(e);
+  const r = parseFloat(document.getElementById('i_r_ar').value) || 100;
+  setAngleAndR(deg, r);
+  calculateFromState(deg, r);
+  updateSlider(deg);
+}
+
+canvas.addEventListener('mousedown', e => {
+  if (CAD.active) { cadAddPoint(e); }
+  else { isDragging = true; handleCanvasInteract(e); }
+});
+canvas.addEventListener('mousemove', e => {
+  if (CAD.active) { cadUpdateHover(e); }
+  else if (isDragging) { handleCanvasInteract(e); }
+});
+window.addEventListener('mouseup', () => { isDragging = false; });
+canvas.addEventListener('touchstart', e => {
+  if (CAD.active) cadAddPoint(e);
+  else handleCanvasInteract(e);
+}, { passive: false });
+canvas.addEventListener('touchmove', e => {
+  if (CAD.active) cadUpdateHover(e);
+  else handleCanvasInteract(e);
+}, { passive: false });
+canvas.addEventListener('mouseleave', () => {
+  if (CAD.active) { CAD.hover = null; drawAll(); }
+});
+
+function setAngleAndR(deg, r) {
+  if (S.unitDeg) {
+    document.getElementById('i_angle_ar').value = deg.toFixed(2);
+    document.getElementById('i_r_ar').value = r;
+  } else {
+    document.getElementById('i_angle_ar').value = (deg * Math.PI / 180).toFixed(5);
+    document.getElementById('i_r_ar').value = r;
+  }
+  document.getElementById('tab-ar').classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === 'tab-ar');
+  });
+  S.activeTab = 'tab-ar';
+}
+
+/* ================================================================
+   CALCULATION
+================================================================ */
+function fmt(v) {
+  if (!isFinite(v)) return '∞';
+  return v.toFixed(S.precision);
+}
+
+function fmtSafe(v) {
+  if (Math.abs(v) > 1e9) return '∞';
+  if (!isFinite(v)) return '∞';
+  return v.toFixed(S.precision);
+}
+
+function toRad(val) {
+  return S.unitDeg ? val * Math.PI / 180 : val;
+}
+
+function toDeg(val) {
+  return S.unitDeg ? val : val * 180 / Math.PI;
+}
+
+function calculate() {
+  const tab = S.activeTab;
+  let angleDeg = NaN, R = NaN, X = NaN, Y = NaN;
+  let formulaHtml = '';
+
+  try {
+    if (tab === 'tab-ar') {
+      const av = parseFloat(document.getElementById('i_angle_ar').value);
+      const rv = parseFloat(document.getElementById('i_r_ar').value);
+      if (isNaN(av) || isNaN(rv)) { showToast('角度とRを両方入力してください'); return; }
+      angleDeg = toDeg(av);
+      R = rv;
+      const a = angleDeg * Math.PI / 180;
+      X = R * Math.cos(a); Y = R * Math.sin(a);
+      formulaHtml = makeFormula('角度+R',
+        `X = R × cos(θ) = ${fmt(R)} × cos(${fmt(angleDeg)}°) = ${fmt(X)}`,
+        `Y = R × sin(θ) = ${fmt(R)} × sin(${fmt(angleDeg)}°) = ${fmt(Y)}`);
+
+    } else if (tab === 'tab-ax') {
+      const av = parseFloat(document.getElementById('i_angle_ax').value);
+      const xv = parseFloat(document.getElementById('i_x_ax').value);
+      if (isNaN(av) || isNaN(xv)) { showToast('角度とXを両方入力してください'); return; }
+      angleDeg = toDeg(av);
+      X = xv;
+      const cosA = Math.cos(angleDeg * Math.PI / 180);
+      if (Math.abs(cosA) < 1e-9) { showToast('cos(θ)≈0 のため計算できません (θ≈90°/270°)'); return; }
+      R = X / cosA; Y = R * Math.sin(angleDeg * Math.PI / 180);
+      formulaHtml = makeFormula('角度+X',
+        `R = X / cos(θ) = ${fmt(X)} / cos(${fmt(angleDeg)}°) = ${fmt(R)}`,
+        `Y = R × sin(θ) = ${fmt(Y)}`);
+
+    } else if (tab === 'tab-ay') {
+      const av = parseFloat(document.getElementById('i_angle_ay').value);
+      const yv = parseFloat(document.getElementById('i_y_ay').value);
+      if (isNaN(av) || isNaN(yv)) { showToast('角度とYを両方入力してください'); return; }
+      angleDeg = toDeg(av);
+      Y = yv;
+      const sinA = Math.sin(angleDeg * Math.PI / 180);
+      if (Math.abs(sinA) < 1e-9) { showToast('sin(θ)≈0 のため計算できません (θ≈0°/180°)'); return; }
+      R = Y / sinA; X = R * Math.cos(angleDeg * Math.PI / 180);
+      formulaHtml = makeFormula('角度+Y',
+        `R = Y / sin(θ) = ${fmt(Y)} / sin(${fmt(angleDeg)}°) = ${fmt(R)}`,
+        `X = R × cos(θ) = ${fmt(X)}`);
+
+    } else if (tab === 'tab-xy') {
+      const xv = parseFloat(document.getElementById('i_x_xy').value);
+      const yv = parseFloat(document.getElementById('i_y_xy').value);
+      if (isNaN(xv) || isNaN(yv)) { showToast('XとYを両方入力してください'); return; }
+      X = xv; Y = yv;
+      R = Math.sqrt(X*X + Y*Y);
+      angleDeg = Math.atan2(Y, X) * 180 / Math.PI;
+      if (angleDeg < 0) angleDeg += 360;
+      formulaHtml = makeFormula('X+Y',
+        `R = √(X²+Y²) = √(${fmt(X)}²+${fmt(Y)}²) = ${fmt(R)}`,
+        `θ = atan2(Y,X) = ${fmt(angleDeg)}°`);
+
+    } else if (tab === 'tab-rx') {
+      const rv = parseFloat(document.getElementById('i_r_rx').value);
+      const xv = parseFloat(document.getElementById('i_x_rx').value);
+      if (isNaN(rv) || isNaN(xv)) { showToast('RとXを両方入力してください'); return; }
+      R = rv; X = xv;
+      if (Math.abs(X) > Math.abs(R)) { showToast('|X| > R です。|X| ≤ R にしてください'); return; }
+      angleDeg = Math.acos(X / R) * 180 / Math.PI;
+      Y = Math.sqrt(Math.max(0, R*R - X*X));
+      formulaHtml = makeFormula('R+X',
+        `θ = acos(X/R) = acos(${fmt(X)}/${fmt(R)}) = ${fmt(angleDeg)}°`,
+        `Y = √(R²−X²) = ${fmt(Y)}`);
+
+    } else if (tab === 'tab-ry') {
+      const rv = parseFloat(document.getElementById('i_r_ry').value);
+      const yv = parseFloat(document.getElementById('i_y_ry').value);
+      if (isNaN(rv) || isNaN(yv)) { showToast('RとYを両方入力してください'); return; }
+      R = rv; Y = yv;
+      if (Math.abs(Y) > Math.abs(R)) { showToast('|Y| > R です。|Y| ≤ R にしてください'); return; }
+      angleDeg = Math.asin(Y / R) * 180 / Math.PI;
+      X = Math.sqrt(Math.max(0, R*R - Y*Y));
+      formulaHtml = makeFormula('R+Y',
+        `θ = asin(Y/R) = asin(${fmt(Y)}/${fmt(R)}) = ${fmt(angleDeg)}°`,
+        `X = √(R²−Y²) = ${fmt(X)}`);
+    }
+
+    if (isNaN(angleDeg) || isNaN(R) || isNaN(X) || isNaN(Y)) return;
+
+    calculateFromState(angleDeg, R, X, Y, formulaHtml);
+    updateSlider(angleDeg);
+
+  } catch(e) {
+    showToast('計算エラー: ' + e.message);
+  }
+}
+
+function calculateFromState(angleDeg, R, X, Y, formulaHtml) {
+  if (Y === undefined) {
+    const a = angleDeg * Math.PI / 180;
+    X = R * Math.cos(a);
+    Y = R * Math.sin(a);
+  }
+
+  S.angleDeg = angleDeg;
+  S.R = R; S.X = X; S.Y = Y;
+  S.hasResult = true;
+
+  updateCadScale();   // ← R が変わるたびスケール連動
+  renderResults(angleDeg, R, X, Y, formulaHtml || '');
+  drawAll();
+  addHistory(angleDeg, R, X, Y);
+}
+
+function makeFormula(mode, ...lines) {
+  const items = lines.map(l => `<div class="f-item">${l}</div>`).join('');
+  return `<div class="f-title">📌 計算モード: ${mode}</div><div class="f-row">${items}</div>`;
+}
+
+function renderResults(angleDeg, R, X, Y, formulaHtml) {
+  const a = angleDeg * Math.PI / 180;
+  const comp = 90 - angleDeg;
+  const sinV = Math.sin(a), cosV = Math.cos(a), tanV = Math.tan(a);
+  const cotV = Math.abs(sinV) < 1e-9 ? Infinity : cosV / sinV;
+  const secV = Math.abs(cosV) < 1e-9 ? Infinity : 1 / cosV;
+  const cscV = Math.abs(sinV) < 1e-9 ? Infinity : 1 / sinV;
+  const tanComp = Math.tan((90 - angleDeg) * Math.PI / 180);
+
+  const rad = a.toFixed(S.precision) + ' rad';
+
+  document.getElementById('r_angle').textContent = fmt(angleDeg) + '°';
+  document.getElementById('r_angle_rad').textContent = rad;
+  document.getElementById('r_comp').textContent = fmt(comp) + '°';
+  document.getElementById('r_comp_rad').textContent = (comp * Math.PI / 180).toFixed(S.precision) + ' rad';
+  document.getElementById('r_R').textContent = fmt(R);
+  document.getElementById('r_X').textContent = fmt(X);
+  document.getElementById('r_Y').textContent = fmt(Y);
+  document.getElementById('r_sin').textContent = fmt(sinV);
+  document.getElementById('r_cos').textContent = fmt(cosV);
+  document.getElementById('r_tan').textContent = fmtSafe(tanV);
+  document.getElementById('r_cot').textContent = fmtSafe(cotV);
+  document.getElementById('r_sec').textContent = fmtSafe(secV);
+  document.getElementById('r_csc').textContent = fmtSafe(cscV);
+  document.getElementById('r_tan_comp').textContent = fmtSafe(tanComp);
+
+  // Quadrant
+  const qbadge = document.getElementById('quadrantBadge');
+  const norm = ((angleDeg % 360) + 360) % 360;
+  let qn = norm < 90 ? 'Ⅰ' : norm < 180 ? 'Ⅱ' : norm < 270 ? 'Ⅲ' : 'Ⅳ';
+  let qcolor = ['#2563eb','#9333ea','#dc2626','#f97316'];
+  let qi = norm < 90 ? 0 : norm < 180 ? 1 : norm < 270 ? 2 : 3;
+  qbadge.style.display = 'inline-flex';
+  qbadge.innerHTML = `第${qn}象限 &nbsp;|&nbsp; θ = ${fmt(norm)}°`;
+  qbadge.style.background = qcolor[qi] + '22';
+  qbadge.style.color = qcolor[qi];
+
+  // Formula
+  if (formulaHtml) {
+    document.getElementById('formulaPanel').style.display = '';
+    document.getElementById('formulaBox').innerHTML = formulaHtml;
+  }
+}
+
+/* ================================================================
+   SLIDER
+================================================================ */
+const slider = document.getElementById('angleSlider');
+const sliderDisplay = document.getElementById('sliderDisplay');
+
+function updateSlider(deg) {
+  const norm = ((deg % 360) + 360) % 360;
+  slider.value = norm;
+  const pct = (norm / 360 * 100).toFixed(1);
+  slider.style.setProperty('--pct', pct + '%');
+  sliderDisplay.textContent = norm.toFixed(1) + '°';
+}
+
+slider.addEventListener('input', () => {
+  const deg = parseFloat(slider.value);
+  sliderDisplay.textContent = deg.toFixed(1) + '°';
+  slider.style.setProperty('--pct', (deg / 360 * 100).toFixed(1) + '%');
+  setAngleAndR(deg, parseFloat(document.getElementById('i_r_ar').value) || 100);
+  calculateFromState(deg, parseFloat(document.getElementById('i_r_ar').value) || 100);
+});
+
+/* ================================================================
+   PRESETS + ANIMATION
+================================================================ */
+document.getElementById('presets').addEventListener('click', e => {
+  if (!e.target.classList.contains('preset-btn')) return;
+  const targetDeg = parseFloat(e.target.dataset.angle);
+  const r = parseFloat(document.getElementById('i_r_ar').value) || 100;
+  animateTo(S.hasResult ? S.angleDeg : 0, targetDeg, r);
+});
+
+document.getElementById('animBtn').addEventListener('click', () => {
+  const r = parseFloat(document.getElementById('i_r_ar').value) || 100;
+  animateTo(0, 360, r, 2000);
+});
+
+function animateTo(from, to, r, duration = 500) {
+  S.animFrom = from;
+  S.animTarget = to;
+  S.animStart = performance.now();
+  S.animDuration = duration;
+  S.animR = r;
+
+  function step(now) {
+    const t = Math.min(1, (now - S.animStart) / S.animDuration);
+    const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+    const cur = S.animFrom + (S.animTarget - S.animFrom) * ease;
+    setAngleAndR(cur, r);
+    calculateFromState(cur, r);
+    updateSlider(cur);
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ================================================================
+   TABS
+================================================================ */
+document.getElementById('tabRow').addEventListener('click', e => {
+  const tab = e.target.closest('.tab');
+  if (!tab) return;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  tab.classList.add('active');
+  const id = tab.dataset.tab;
+  document.getElementById(id).classList.add('active');
+  S.activeTab = id;
+});
+
+/* ================================================================
+   UNIT TOGGLE
+================================================================ */
+document.getElementById('unitToggle').addEventListener('click', e => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+  document.querySelectorAll('#unitToggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  S.unitDeg = btn.dataset.unit === 'deg';
+  ['ub_angle_ar','ub_angle_ax','ub_angle_ay'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = S.unitDeg ? '°' : 'rad';
+  });
+});
+
+/* ================================================================
+   PRECISION
+================================================================ */
+document.getElementById('precisionSel').addEventListener('change', e => {
+  S.precision = parseInt(e.target.value);
+  if (S.hasResult) renderResults(S.angleDeg, S.R, S.X, S.Y, '');
+});
+
+/* ================================================================
+   BUTTONS
+================================================================ */
+document.getElementById('calcBtn').addEventListener('click', calculate);
+document.getElementById('rotateBtn').addEventListener('click', () => {
+  S.rotation += Math.PI;
+  drawAll();
+  showToast('図形を180°回転しました');
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  S.angleDeg = 0; S.R = 0; S.X = 0; S.Y = 0;
+  S.hasResult = false; S.rotation = 0;
+  document.querySelectorAll('input[type=number]').forEach(i => i.value = '');
+  ['r_angle','r_angle_rad','r_comp','r_comp_rad','r_R','r_X','r_Y',
+   'r_sin','r_cos','r_tan','r_cot','r_sec','r_csc','r_tan_comp']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '—';
+    });
+  document.getElementById('quadrantBadge').style.display = 'none';
+  document.getElementById('formulaPanel').style.display = 'none';
+  updateSlider(0);
+  drawAll();
+  showToast('リセットしました');
+});
+
+/* ================================================================
+   COPY RESULTS
+================================================================ */
+document.getElementById('copyResultsBtn').addEventListener('click', () => {
+  if (!S.hasResult) { showToast('先に計算してください'); return; }
+  const text = [
+    `角度θ: ${fmt(S.angleDeg)}°`,
+    `R: ${fmt(S.R)}`,
+    `X: ${fmt(S.X)}`,
+    `Y: ${fmt(S.Y)}`,
+    `sin θ: ${fmt(Math.sin(S.angleDeg*Math.PI/180))}`,
+    `cos θ: ${fmt(Math.cos(S.angleDeg*Math.PI/180))}`,
+    `tan θ: ${fmtSafe(Math.tan(S.angleDeg*Math.PI/180))}`,
+  ].join('\n');
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('📋 結果をコピーしました'))
+    .catch(() => showToast('コピーに失敗しました'));
+});
+
+/* ================================================================
+   TOOLBAR TOGGLES
+================================================================ */
+document.getElementById('unitCircleBtn').addEventListener('click', e => {
+  S.showUnitCircle = !S.showUnitCircle;
+  e.currentTarget.classList.toggle('active', S.showUnitCircle);
+  drawAll();
+});
+document.getElementById('gridBtn').addEventListener('click', e => {
+  S.showGrid = !S.showGrid;
+  e.currentTarget.classList.toggle('active', S.showGrid);
+  drawAll();
+});
+document.getElementById('fillBtn').addEventListener('click', e => {
+  S.showFill = !S.showFill;
+  e.currentTarget.classList.toggle('active', S.showFill);
+  drawAll();
+});
+
+/* ================================================================
+   SAVE IMAGE
+================================================================ */
+document.getElementById('saveImgBtn').addEventListener('click', () => {
+  const link = document.createElement('a');
+  link.download = `三角関数_${fmt(S.angleDeg)}度.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('💾 画像を保存しました');
+});
+
+/* ================================================================
+   HISTORY
+================================================================ */
+const MAX_HISTORY = 10;
+let history = (() => {
+  try {
+    return JSON.parse(localStorage.getItem('triHistory') || '[]');
+  } catch (e) {
+    localStorage.removeItem('triHistory');
+    return [];
+  }
+})();
+
+function addHistory(angleDeg, R, X, Y) {
+  const entry = { angleDeg, R, X, Y, ts: Date.now() };
+  history = [entry, ...history.filter(h => Math.abs(h.angleDeg - angleDeg) > 0.01 || Math.abs(h.R - R) > 0.01)].slice(0, MAX_HISTORY);
+  try { localStorage.setItem('triHistory', JSON.stringify(history)); } catch(e) {}
+  renderHistory();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (!history.length) {
+    list.innerHTML = '<div class="history-empty">履歴はありません</div>';
+    return;
+  }
+  list.innerHTML = history.map((h, i) => `
+    <div class="history-item" data-i="${i}">
+      <span class="h-angle">${h.angleDeg.toFixed(2)}°</span>
+      <span class="h-vals">R=${h.R.toFixed(2)} X=${h.X.toFixed(2)} Y=${h.Y.toFixed(2)}</span>
+      <button class="history-del" data-del="${i}" title="削除">✕</button>
+    </div>
+  `).join('');
+}
+
+document.getElementById('historyList').addEventListener('click', e => {
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    history.splice(parseInt(del.dataset.del), 1);
+    try { localStorage.setItem('triHistory', JSON.stringify(history)); } catch(e) {}
+    renderHistory();
+    return;
+  }
+  const item = e.target.closest('[data-i]');
+  if (!item) return;
+  const h = history[parseInt(item.dataset.i)];
+  setAngleAndR(h.angleDeg, h.R);
+  calculateFromState(h.angleDeg, h.R, h.X, h.Y);
+  updateSlider(h.angleDeg);
+  showToast('履歴を復元しました');
+});
+
+document.getElementById('clearHistoryBtn').addEventListener('click', () => {
+  history = [];
+  try { localStorage.setItem('triHistory', JSON.stringify(history)); } catch(e) {}
+  renderHistory();
+  showToast('履歴を消去しました');
+});
+
+/* ================================================================
+   TOAST
+================================================================ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ================================================================
+   ENTER KEY
+================================================================ */
+document.querySelectorAll('input[type=number]').forEach(inp => {
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+});
+
+/* ================================================================
+   AUTO-CALC (debounced)
+================================================================ */
+let autoCalcTimer;
+document.querySelectorAll('input[type=number]').forEach(inp => {
+  inp.addEventListener('input', () => {
+    clearTimeout(autoCalcTimer);
+    autoCalcTimer = setTimeout(calculate, 600);
+  });
+});
+
+/* ================================================================
+   RESIZE
+================================================================ */
+function resizeCanvas() {
+  const wrap = canvas.parentElement;
+  const w = wrap.clientWidth;
+  canvas.width  = Math.max(400, w);
+  canvas.height = Math.round(canvas.width * 0.6);
+  /* CAD点: 新しいスケール・中心でpx/pyを再計算（数学座標cx/cyを基準に） */
+  if (typeof CAD !== 'undefined') {
+    cadRecomputeScale();   // スケールを先に更新してから再投影
+  }
+  drawAll();
+}
+
+window.addEventListener('resize', resizeCanvas);
+
+/* ================================================================
+   CAD POINT MEASUREMENT — 状態オブジェクト (drawAllより前に定義が必要)
+================================================================ */
+const CAD = {
+  active:  false,
+  points:  [],   // [{px, py, cx, cy}] px/py = canvas pixels, cx/cy = math coords
+  hover:   null, // hover preview point
+  get scale() { return this._scale ?? 1; },
+  set scale(v) { this._scale = v; },
+  _scale:  null, // null = まだ初期化されていない（INIT後に自動設定）
+};
+
+/* ================================================================
+   INIT
+================================================================ */
+renderHistory();
+resizeCanvas();
+updateSlider(0);
+/* CAD初期スケール: resizeCanvas後にキャンバスサイズが確定してから設定 */
+cadRecomputeScale();
+
+/* --- ピクセル座標 → 数学座標 変換 --- */
+function cadPixToMath(px, py) {
+  const p = pivot();
+  return {
+    cx: (px - p.x) / CAD.scale,
+    cy: -(py - p.y) / CAD.scale,
+  };
+}
+
+/* --- イベントからキャンバス内ピクセル座標を取得 --- */
+function cadEventPx(e) {
+  const rect = canvas.getBoundingClientRect();
+  const sx = CW() / rect.width;
+  const sy = CH() / rect.height;
+  let px, py;
+  if (e.touches) {
+    px = (e.touches[0].clientX - rect.left) * sx;
+    py = (e.touches[0].clientY - rect.top)  * sy;
+  } else {
+    px = (e.clientX - rect.left) * sx;
+    py = (e.clientY - rect.top)  * sy;
+  }
+  return { px, py, ...cadPixToMath(px, py) };
+}
+
+function cadAddPoint(e) {
+  e.preventDefault();
+  const pt = cadEventPx(e);
+  CAD.points.push(pt);
+  renderCadPanel();
+  drawAll();
+  document.getElementById('cadUndoBtn').style.display = '';
+  document.getElementById('cadClearBtn').style.display = '';
+}
+
+function cadUpdateHover(e) {
+  CAD.hover = cadEventPx(e);
+  drawAll();
+}
+
+/* --- CAD レイヤー描画 --- */
+function drawCadLayer(c, p) {
+  const pts = CAD.points;
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const color   = '#6366f1';
+  const colorA  = 'rgba(99,102,241,';
+
+  /* セグメント（線 + 寸法ラベル） */
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i];
+
+    /* 線 */
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(a.px, a.py);
+    ctx.lineTo(b.px, b.py);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([7, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    /* ΔX 補助線（水平） */
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(a.px, a.py);
+    ctx.lineTo(b.px, a.py);
+    ctx.strokeStyle = colorA + '0.35)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    /* ΔY 補助線（垂直） */
+    ctx.beginPath();
+    ctx.moveTo(b.px, a.py);
+    ctx.lineTo(b.px, b.py);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    /* 距離・角度ラベル（中点の上） */
+    const mx = (a.px + b.px) / 2;
+    const my = (a.py + b.py) / 2;
+    const dxPx = b.px - a.px, dyPx = -(b.py - a.py); // Y反転
+    const dist  = Math.sqrt(dxPx * dxPx + dyPx * dyPx) / CAD.scale;
+    const angDeg = Math.atan2(dyPx, dxPx) * 180 / Math.PI;
+    cadLabelAt(`${dist.toFixed(2)} (${angDeg.toFixed(1)}°)`, mx, my - 14, color);
+  }
+
+  /* ホバー予測線（最後の点→マウス位置） */
+  if (CAD.hover && pts.length > 0) {
+    const last = pts[pts.length - 1];
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(last.px, last.py);
+    ctx.lineTo(CAD.hover.px, CAD.hover.py);
+    ctx.strokeStyle = colorA + '0.5)';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([5, 5]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    /* ホバー距離プレビュー */
+    const dxPx = CAD.hover.px - last.px;
+    const dyPx = -(CAD.hover.py - last.py);
+    const hDist = Math.sqrt(dxPx * dxPx + dyPx * dyPx) / CAD.scale;
+    const hAng  = Math.atan2(dyPx, dxPx) * 180 / Math.PI;
+    const hmx = (last.px + CAD.hover.px) / 2;
+    const hmy = (last.py + CAD.hover.py) / 2;
+    if (hDist > 5) cadLabelAt(`${hDist.toFixed(1)} (${hAng.toFixed(1)}°)`, hmx, hmy - 12, colorA + '0.7)');
+    ctx.restore();
+  }
+
+  /* 点マーカー */
+  pts.forEach((pt, i) => {
+    /* 点 */
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(pt.px, pt.py, 5, 0, Math.PI * 2);
+    ctx.fillStyle   = color;
+    ctx.fill();
+    ctx.strokeStyle = S.dark ? '#1e293b' : '#ffffff';
+    ctx.lineWidth   = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    /* ラベル（点の名前 + 座標） */
+    const letter = LETTERS[i % 26];
+    const coordLabel = `${letter}(${pt.cx.toFixed(1)}, ${pt.cy.toFixed(1)})`;
+    const offY = pt.py > 30 ? -14 : 18;
+    cadLabelAt(coordLabel, pt.px + 6, pt.py + offY, color);
+  });
+
+  /* ホバー点 */
+  if (CAD.hover) {
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(CAD.hover.px, CAD.hover.py, 4, 0, Math.PI * 2);
+    ctx.fillStyle   = colorA + '0.55)';
+    ctx.fill();
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = 1.5;
+    ctx.stroke();
+
+    /* クロスヘア */
+    ctx.beginPath();
+    ctx.moveTo(CAD.hover.px - 10, CAD.hover.py);
+    ctx.lineTo(CAD.hover.px + 10, CAD.hover.py);
+    ctx.moveTo(CAD.hover.px, CAD.hover.py - 10);
+    ctx.lineTo(CAD.hover.px, CAD.hover.py + 10);
+    ctx.strokeStyle = color;
+    ctx.lineWidth   = 1;
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/* CAD 用テキストラベル（背景付き） */
+function cadLabelAt(text, x, y, color) {
+  ctx.save();
+  ctx.font = 'bold 11px sans-serif';
+  const m   = ctx.measureText(text);
+  const pad = 3, h = 14;
+  ctx.fillStyle   = S.dark ? 'rgba(30,41,59,0.88)' : 'rgba(255,255,255,0.92)';
+  ctx.strokeStyle = typeof color === 'string' && color.startsWith('rgba')
+    ? color : color + '55';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(x - pad, y - h / 2 - pad, m.width + pad * 2, h + pad * 2, 3);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle   = typeof color === 'string' && color.startsWith('rgba')
+    ? '#6366f1' : color;
+  ctx.textBaseline = 'middle';
+  ctx.textAlign    = 'left';
+  ctx.fillText(text, x, y);
+  ctx.restore();
+}
+
+/* --- CADパネル（座標表・寸法表）を更新 --- */
+function renderCadPanel() {
+  const pts   = CAD.points;
+  const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+  /* 座標表 */
+  const wrap = document.getElementById('cadPointsWrap');
+  if (pts.length === 0) {
+    wrap.innerHTML = '<div class="cad-empty">📍 キャンバスをクリックして点を打ってください</div>';
+    document.getElementById('cadDimsWrap').style.display  = 'none';
+    document.getElementById('cadTotals').style.display    = 'none';
+    return;
+  }
+
+  let ptRows = pts.map((pt, i) => `
+    <tr>
+      <td>${LETTERS[i % 26]}
+        <button class="del-pt" data-pi="${i}" title="この点を削除">✕</button>
+      </td>
+      <td>${pt.cx.toFixed(3)}</td>
+      <td>${pt.cy.toFixed(3)}</td>
+    </tr>`).join('');
+
+  wrap.innerHTML = `
+    <table class="cad-table">
+      <thead><tr><th>点</th><th>X</th><th>Y</th></tr></thead>
+      <tbody>${ptRows}</tbody>
+    </table>`;
+
+  /* 寸法表 */
+  const dimsWrap = document.getElementById('cadDimsWrap');
+  const dimBody  = document.getElementById('cadDimBody');
+  if (pts.length < 2) {
+    dimsWrap.style.display = 'none';
+    document.getElementById('cadTotals').style.display = 'none';
+    return;
+  }
+
+  dimsWrap.style.display = '';
+  let totalDist = 0;
+  let dimRows = '';
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i];
+    const dx   = b.cx - a.cx, dy = b.cy - a.cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const ang  = Math.atan2(dy, dx) * 180 / Math.PI;
+    totalDist += dist;
+    dimRows += `<tr>
+      <td>${LETTERS[(i-1)%26]}→${LETTERS[i%26]}</td>
+      <td>${dist.toFixed(3)}</td>
+      <td>${ang.toFixed(2)}°</td>
+      <td>${dx.toFixed(3)}</td>
+      <td>${dy.toFixed(3)}</td>
+    </tr>`;
+  }
+  dimBody.innerHTML = dimRows;
+
+  /* 合計行 */
+  const totEl = document.getElementById('cadTotals');
+  const firstPt = pts[0], lastPt = pts[pts.length - 1];
+  const dxTotal = lastPt.cx - firstPt.cx;
+  const dyTotal = lastPt.cy - firstPt.cy;
+  const directDist = Math.sqrt(dxTotal * dxTotal + dyTotal * dyTotal);
+  totEl.style.display = '';
+  totEl.innerHTML = `
+    <span>📏 総距離: <strong>${totalDist.toFixed(3)}</strong></span>
+    <span>↔ 直線距離(始→終): <strong>${directDist.toFixed(3)}</strong></span>
+    <span>📍 点数: <strong>${pts.length}</strong></span>`;
+}
+
+/* 点削除（座標表の ✕ ボタン） */
+document.getElementById('cadPointsWrap').addEventListener('click', e => {
+  const btn = e.target.closest('[data-pi]');
+  if (!btn) return;
+  CAD.points.splice(parseInt(btn.dataset.pi), 1);
+  renderCadPanel();
+  drawAll();
+  if (CAD.points.length === 0) {
+    document.getElementById('cadUndoBtn').style.display = 'none';
+    document.getElementById('cadClearBtn').style.display = 'none';
+  }
+});
+
+/* --- CAD モード ON/OFF --- */
+function setCadMode(active) {
+  CAD.active = active;
+  document.getElementById('cadBtn').classList.toggle('cad-active', active);
+  document.getElementById('cadPanel').style.display   = active ? '' : (CAD.points.length ? '' : 'none');
+  canvas.style.cursor = active ? 'crosshair' : 'default';
+  const hint = document.getElementById('canvasHint');
+  if (active) {
+    hint.textContent  = '';
+    hint.className    = 'cad-hint-bar';
+    hint.innerHTML    = '📍 クリックで点を追加 ／ 右クリックまたは「戻す」で最後の点を削除 ／ Escで計測モード終了';
+  } else {
+    hint.className    = 'canvas-hint';
+    hint.textContent  = '📌 Canvasをクリック・ドラッグすると角度をインタラクティブに設定できます';
+  }
+  if (!active) { CAD.hover = null; }
+  drawAll();
+}
+
+document.getElementById('cadBtn').addEventListener('click', () => setCadMode(!CAD.active));
+
+/* 「戻す」: 最後の点を削除 */
+document.getElementById('cadUndoBtn').addEventListener('click', () => {
+  CAD.points.pop();
+  renderCadPanel();
+  drawAll();
+  if (CAD.points.length === 0) {
+    document.getElementById('cadUndoBtn').style.display = 'none';
+    document.getElementById('cadClearBtn').style.display = 'none';
+  }
+});
+
+/* 「全消去」: 全点クリア */
+document.getElementById('cadClearBtn').addEventListener('click', () => {
+  CAD.points = [];
+  CAD.hover  = null;
+  renderCadPanel();
+  drawAll();
+  document.getElementById('cadUndoBtn').style.display = 'none';
+  document.getElementById('cadClearBtn').style.display = 'none';
+  if (!CAD.active) document.getElementById('cadPanel').style.display = 'none';
+  showToast('点をすべて消去しました');
+});
+
+/* 右クリックで最後の点を削除 */
+canvas.addEventListener('contextmenu', e => {
+  if (!CAD.active) return;
+  e.preventDefault();
+  if (CAD.points.length > 0) {
+    CAD.points.pop();
+    renderCadPanel();
+    drawAll();
+  }
+  if (CAD.points.length === 0) {
+    document.getElementById('cadUndoBtn').style.display = 'none';
+    document.getElementById('cadClearBtn').style.display = 'none';
+  }
+});
+
+/* Esc キーで CAD モード終了 */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && CAD.active) setCadMode(false);
+  if ((e.key === 'Backspace' || e.key === 'Delete') && CAD.active) {
+    if (CAD.points.length > 0) {
+      CAD.points.pop();
+      renderCadPanel();
+      drawAll();
+    }
+  }
+});
+
+/* ----------------------------------------------------------------
+   スケール自動計算
+   三角形描画: scaledR[px] = maxR * 0.82 = S.R[単位]
+   → CAD.scale[px/単位] = scaledR / S.R
+---------------------------------------------------------------- */
+function cadComputeScale() {
+  const scaledR = Math.min(CW(), CH()) * 0.40 * 0.82;
+  const r = S.R > 0 ? S.R : 100;   // 計算前は R=100 相当
+  return scaledR / r;
+}
+
+/* スケール更新 + 既存点を数学座標→ピクセルに再投影 */
+function cadRecomputeScale() {
+  const newScale = cadComputeScale();
+  CAD.scale = newScale;
+  const p = pivot();
+  CAD.points = CAD.points.map(pt => ({
+    ...pt,
+    px: p.x + pt.cx * newScale,
+    py: p.y - pt.cy * newScale,
+  }));
+  /* 表示更新 */
+  const info = document.getElementById('cadScaleInfo');
+  if (info) {
+    const r = S.R > 0 ? S.R : 100;
+    const label = S.R > 0 ? `R=${r.toFixed(1)}に連動` : `R=100基準(未計算)`;
+    info.textContent = `📐 ${label} / 1単位=${newScale.toFixed(2)}px`;
+  }
+  if (CAD.points.length > 0) renderCadPanel();
+}
+
+/* calculateFromState から呼ぶ軽量版（cx/cyはそのまま保ちスケールだけ変える） */
+function updateCadScale() {
+  cadRecomputeScale();
+}
+</script>
+</body>
+</html>
