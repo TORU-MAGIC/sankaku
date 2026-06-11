@@ -644,6 +644,37 @@ input[type=range]::-webkit-slider-thumb {
   text-align: right;
 }
 
+.cad-manual-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+}
+
+.cad-manual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.cad-manual-grid .input-field { min-width: 0; }
+.cad-manual-grid input[type=number] { padding: 7px 10px; font-size: 0.86rem; }
+
+.cad-manual-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.cad-manual-actions .tool-btn {
+  justify-content: center;
+  padding: 6px 8px;
+  font-size: 0.76rem;
+}
+
 .cad-table {
   width: 100%;
   border-collapse: collapse;
@@ -749,7 +780,7 @@ input[type=range]::-webkit-slider-thumb {
 
       <div class="canvas-wrap panel">
         <div class="canvas-toolbar">
-          <button class="tool-btn" id="unitCircleBtn">⭕ 単位円</button>
+          <button class="tool-btn" id="unitCircleBtn">⭕ R円</button>
           <button class="tool-btn active" id="gridBtn"># グリッド</button>
           <button class="tool-btn" id="fillBtn">🎨 塗りつぶし</button>
           <button class="tool-btn" id="animBtn">▶ アニメーション</button>
@@ -773,6 +804,24 @@ input[type=range]::-webkit-slider-thumb {
           </div>
         </div>
         <div class="panel-body">
+          <div class="cad-manual-box">
+            <div class="cad-manual-grid">
+              <div class="input-field">
+                <label for="cadNumX">X座標</label>
+                <input id="cadNumX" type="number" placeholder="例: 50" step="any" data-cad-input="true">
+              </div>
+              <div class="input-field">
+                <label for="cadNumY">Y座標</label>
+                <input id="cadNumY" type="number" placeholder="例: 30" step="any" data-cad-input="true">
+              </div>
+            </div>
+            <div class="cad-manual-actions">
+              <button class="tool-btn" id="cadAddNumBtn" type="button">+ 点追加</button>
+              <button class="tool-btn" id="cadAddOriginBtn" type="button">O追加</button>
+              <button class="tool-btn" id="cadAddResultBtn" type="button">計算点</button>
+            </div>
+          </div>
+          <div class="divider"></div>
           <!-- Point coordinates table -->
           <div id="cadPointsWrap">
             <div class="cad-empty">📍 キャンバスをクリックして点を打ってください</div>
@@ -957,7 +1006,10 @@ input[type=range]::-webkit-slider-thumb {
           <div class="presets" id="presets">
             <span style="font-size:0.75rem;color:var(--text3);align-self:center;">プリセット:</span>
             <button class="preset-btn" data-angle="0">0°</button>
+            <button class="preset-btn" data-angle="11.25">11.25°</button>
+            <button class="preset-btn" data-angle="22.5">22.5°</button>
             <button class="preset-btn" data-angle="30">30°</button>
+            <button class="preset-btn" data-angle="33.75">33.75°</button>
             <button class="preset-btn" data-angle="45">45°</button>
             <button class="preset-btn" data-angle="60">60°</button>
             <button class="preset-btn" data-angle="90">90°</button>
@@ -1163,20 +1215,60 @@ function getColors() {
   return {
     bg:     S.dark ? '#1e293b' : '#ffffff',
     axis:   S.dark ? '#334155' : '#e2e8f0',
-    grid:   S.dark ? '#1e3a5f' : '#eff6ff',
+    grid:   S.dark ? 'rgba(96,165,250,0.18)' : 'rgba(59,130,246,0.16)',
+    gridMajor: S.dark ? 'rgba(125,211,252,0.32)' : 'rgba(37,99,235,0.28)',
     tri:    S.dark ? '#f1f5f9' : '#111827',
-    fill:   S.dark ? 'rgba(37,99,235,0.15)' : 'rgba(37,99,235,0.08)',
+    fill:   S.dark ? 'rgba(236,72,153,0.40)' : 'rgba(236,72,153,0.38)',
+    fillStroke: '#ec4899',
     dimX:   '#ef4444',
     dimY:   '#f97316',
     dimR:   '#7c3aed',
     arc:    '#2563eb',
     arcTop: '#9333ea',
-    circle: S.dark ? 'rgba(16,185,129,0.35)' : 'rgba(16,185,129,0.25)',
+    circle: S.dark ? 'rgba(16,185,129,0.18)' : 'rgba(16,185,129,0.12)',
     circleStroke: '#10b981',
     text:   S.dark ? '#f1f5f9' : '#0f172a',
     text2:  S.dark ? '#94a3b8' : '#64748b',
     quad:   S.dark ? 'rgba(148,163,184,0.2)' : 'rgba(100,116,139,0.08)',
   };
+}
+
+function readCurrentRadiusInput() {
+  const idsByTab = {
+    'tab-ar': 'i_r_ar',
+    'tab-rx': 'i_r_rx',
+    'tab-ry': 'i_r_ry',
+  };
+  const id = idsByTab[S.activeTab] || 'i_r_ar';
+  const v = parseFloat(document.getElementById(id)?.value);
+  return isFinite(v) ? Math.abs(v) : NaN;
+}
+
+function geometryRadiusValue() {
+  const resultR = S.hasResult ? Math.abs(S.R) : NaN;
+  const inputR = readCurrentRadiusInput();
+  const r = isFinite(resultR) && resultR > 1e-9 ? resultR : inputR;
+  return isFinite(r) && r > 1e-9 ? r : 100;
+}
+
+function canvasUnitScale(maxR) {
+  return (maxR * 0.82) / geometryRadiusValue();
+}
+
+function chooseGridUnit(pxPerUnit) {
+  if (!isFinite(pxPerUnit) || pxPerUnit <= 0) return 10;
+  const rough = 28 / pxPerUnit;
+  const pow = Math.pow(10, Math.floor(Math.log10(rough)));
+  const normalized = rough / pow;
+  const steps = [1, 2, 2.5, 5, 10];
+  const picked = steps.find(step => normalized <= step) ?? 10;
+  return picked * pow;
+}
+
+function formatGridNumber(v) {
+  const abs = Math.abs(v);
+  const fixed = abs >= 100 ? v.toFixed(0) : abs >= 10 ? v.toFixed(1) : v.toFixed(2);
+  return fixed.includes('.') ? fixed.replace(/\.?0+$/, '') : fixed;
 }
 
 function drawAll() {
@@ -1188,26 +1280,59 @@ function drawAll() {
 
   const maxR = Math.min(CW(), CH()) * 0.40;
 
-  if (S.showGrid) drawGrid(c, p);
+  if (S.showGrid) drawGrid(c, p, maxR);
   drawAxes(c, p);
   if (S.showUnitCircle) drawUnitCircle(c, p, maxR);
   drawQuadrantLabels(c, p, maxR);
   if (S.hasResult) drawTriangle(c, p, maxR);
-  if (CAD.active || CAD.points.length > 0) drawCadLayer(c, p);
+  if (CAD && (CAD.active || CAD.points.length > 0)) drawCadLayer(c, p);
 }
 
-function drawGrid(c, p) {
-  const step = 60;
-  ctx.strokeStyle = c.grid;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
+function drawGrid(c, p, maxR) {
+  const scale = canvasUnitScale(maxR);
+  const unit = chooseGridUnit(scale);
+  const step = unit * scale;
+  const majorEvery = 5;
+  const majorStep = step * majorEvery;
+
   for (let x = p.x % step; x < CW(); x += step) {
+    const n = Math.round((x - p.x) / step);
+    const major = n % majorEvery === 0;
+    ctx.beginPath();
     ctx.moveTo(x, 0); ctx.lineTo(x, CH());
+    ctx.strokeStyle = major ? c.gridMajor : c.grid;
+    ctx.lineWidth = major ? 1 : 0.65;
+    ctx.stroke();
   }
   for (let y = p.y % step; y < CH(); y += step) {
+    const n = Math.round((y - p.y) / step);
+    const major = n % majorEvery === 0;
+    ctx.beginPath();
     ctx.moveTo(0, y); ctx.lineTo(CW(), y);
+    ctx.strokeStyle = major ? c.gridMajor : c.grid;
+    ctx.lineWidth = major ? 1 : 0.65;
+    ctx.stroke();
   }
-  ctx.stroke();
+
+  if (majorStep < 48) return;
+  ctx.fillStyle = c.text2;
+  ctx.font = '10px sans-serif';
+  ctx.textBaseline = 'top';
+  ctx.textAlign = 'center';
+  for (let x = p.x + majorStep; x < CW() - 12; x += majorStep) {
+    ctx.fillText(formatGridNumber((x - p.x) / scale), x, p.y + 4);
+  }
+  for (let x = p.x - majorStep; x > 12; x -= majorStep) {
+    ctx.fillText(formatGridNumber((x - p.x) / scale), x, p.y + 4);
+  }
+  ctx.textAlign = 'right';
+  ctx.textBaseline = 'middle';
+  for (let y = p.y - majorStep; y > 12; y -= majorStep) {
+    ctx.fillText(formatGridNumber((p.y - y) / scale), p.x - 6, y);
+  }
+  for (let y = p.y + majorStep; y < CH() - 12; y += majorStep) {
+    ctx.fillText(formatGridNumber((p.y - y) / scale), p.x - 6, y);
+  }
 }
 
 function drawAxes(c, p) {
@@ -1233,20 +1358,22 @@ function drawAxes(c, p) {
 }
 
 function drawUnitCircle(c, p, maxR) {
+  const rValue = geometryRadiusValue();
+  const radiusPx = rValue * canvasUnitScale(maxR);
   ctx.beginPath();
-  ctx.arc(p.x, p.y, maxR, 0, Math.PI * 2);
+  ctx.arc(p.x, p.y, radiusPx, 0, Math.PI * 2);
+  ctx.fillStyle = c.circle;
+  ctx.fill();
   ctx.strokeStyle = c.circleStroke;
-  ctx.lineWidth = 1.5;
+  ctx.lineWidth = 1.8;
   ctx.setLineDash([6, 4]);
   ctx.stroke();
   ctx.setLineDash([]);
-  ctx.fillStyle = c.circle;
-  ctx.fill();
 
   ctx.fillStyle = c.circleStroke;
-  ctx.font = '11px sans-serif';
+  ctx.font = 'bold 11px sans-serif';
   ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-  ctx.fillText('単位円', p.x + maxR + 6, p.y - 10);
+  ctx.fillText(`R円 (R=${formatGridNumber(rValue)})`, p.x + radiusPx + 6, p.y - 10);
 }
 
 function drawQuadrantLabels(c, p, maxR) {
@@ -1264,65 +1391,74 @@ function drawQuadrantLabels(c, p, maxR) {
 }
 
 function drawTriangle(c, p, maxR) {
-  const a = (S.angleDeg * Math.PI / 180) + S.rotation;
+  const visualAngle = (S.angleDeg * Math.PI / 180) + S.rotation;
+  const scale = canvasUnitScale(maxR);
+  const cosRot = Math.cos(S.rotation);
+  const sinRot = Math.sin(S.rotation);
+  const vx = S.X * cosRot - S.Y * sinRot;
+  const vy = S.X * sinRot + S.Y * cosRot;
 
-  const pxR = S.R > 0 ? Math.min(S.R, 1) : 1;
-  const scaledR = maxR * 0.82;
+  const endX = p.x + vx * scale;
+  const endY = p.y - vy * scale;
+  const footX = endX;
+  const footY = p.y;
 
-  const endX = p.x + scaledR * Math.cos(-a);  // canvas Y is inverted
-  const endY = p.y + scaledR * Math.sin(-a);
-  const baseX = p.x + scaledR * Math.cos(-a);
-  const baseY = p.y;
+  if (Math.hypot(endX - p.x, endY - p.y) < 2) return;
 
   // Triangle fill
   if (S.showFill) {
     ctx.beginPath();
     ctx.moveTo(p.x, p.y);
-    ctx.lineTo(endX, p.y);
+    ctx.lineTo(footX, footY);
     ctx.lineTo(endX, endY);
     ctx.closePath();
     ctx.fillStyle = c.fill;
     ctx.fill();
+    ctx.strokeStyle = c.fillStroke;
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([4, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
 
   // Hypotenuse (R line)
   drawArrowLine(ctx, p.x, p.y, endX, endY, c.dimR, 2.5);
 
   // X component
-  drawArrowLine(ctx, p.x, p.y, endX, p.y, c.dimX, 2);
+  drawArrowLine(ctx, p.x, p.y, footX, footY, c.dimX, 2);
 
   // Y component
-  drawArrowLine(ctx, endX, p.y, endX, endY, c.dimY, 2);
+  drawArrowLine(ctx, footX, footY, endX, endY, c.dimY, 2);
 
   // Right angle marker
   const raSize = 12;
-  const xSign = endX >= p.x ? 1 : -1;
+  const xSign = footX >= p.x ? 1 : -1;
   const ySign = endY <= p.y ? -1 : 1;
   ctx.beginPath();
-  ctx.moveTo(endX - raSize * xSign, p.y);
-  ctx.lineTo(endX - raSize * xSign, p.y + raSize * ySign);
-  ctx.lineTo(endX, p.y + raSize * ySign);
+  ctx.moveTo(footX - raSize * xSign, footY);
+  ctx.lineTo(footX - raSize * xSign, footY + raSize * ySign);
+  ctx.lineTo(footX, footY + raSize * ySign);
   ctx.strokeStyle = c.text2;
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
   // Angle arc at origin
-  const arcR = 40;
+  const arcR = Math.min(54, Math.max(32, geometryRadiusValue() * scale * 0.20));
   ctx.beginPath();
-  ctx.arc(p.x, p.y, arcR, 0, -a, a > 0);
+  ctx.arc(p.x, p.y, arcR, 0, -visualAngle, visualAngle > 0);
   ctx.strokeStyle = c.arc;
   ctx.lineWidth = 2;
   ctx.stroke();
 
   // Labels
   ctx.font = 'bold 14px sans-serif';
-  labelAt(ctx, `θ=${S.angleDeg.toFixed(1)}°`, p.x + arcR * Math.cos(-a/2) + 5, p.y + arcR * Math.sin(-a/2) - 10, c.arc);
+  labelAt(ctx, `θ=${S.angleDeg.toFixed(1)}°`, p.x + arcR * Math.cos(-visualAngle / 2) + 5, p.y + arcR * Math.sin(-visualAngle / 2) - 10, c.arc);
 
   const midRx = (p.x + endX) / 2;
   const midRy = (p.y + endY) / 2;
   labelAt(ctx, `R=${fmt(S.R)}`, midRx - 30, midRy - 10, c.dimR);
-  labelAt(ctx, `X=${fmt(S.X)}`, (p.x + endX) / 2, p.y + 22, c.dimX);
-  labelAt(ctx, `Y=${fmt(S.Y)}`, endX + (endX > p.x ? 8 : -8), (p.y + endY) / 2, c.dimY);
+  labelAt(ctx, `X=${fmt(S.X)}`, (p.x + footX) / 2, p.y + (endY <= p.y ? 22 : -22), c.dimX);
+  labelAt(ctx, `Y=${fmt(S.Y)}`, footX + (footX > p.x ? 8 : -58), (footY + endY) / 2, c.dimY);
 
   // Endpoint dot
   ctx.beginPath();
@@ -1357,7 +1493,6 @@ function drawArrowLine(ctx, x1, y1, x2, y2, color, lw) {
   ctx.fillStyle = color;
   ctx.fill();
 }
-
 function labelAt(ctx, text, x, y, color) {
   ctx.save();
   ctx.font = 'bold 13px sans-serif';
@@ -1868,7 +2003,7 @@ function showToast(msg) {
 /* ================================================================
    ENTER KEY
 ================================================================ */
-document.querySelectorAll('input[type=number]').forEach(inp => {
+document.querySelectorAll('input[type=number]:not([data-cad-input])').forEach(inp => {
   inp.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
 });
 
@@ -1876,7 +2011,7 @@ document.querySelectorAll('input[type=number]').forEach(inp => {
    AUTO-CALC (debounced)
 ================================================================ */
 let autoCalcTimer;
-document.querySelectorAll('input[type=number]').forEach(inp => {
+document.querySelectorAll('input[type=number]:not([data-cad-input])').forEach(inp => {
   inp.addEventListener('input', () => {
     clearTimeout(autoCalcTimer);
     autoCalcTimer = setTimeout(calculate, 600);
@@ -1903,7 +2038,7 @@ window.addEventListener('resize', resizeCanvas);
 /* ================================================================
    CAD POINT MEASUREMENT — 状態オブジェクト (drawAllより前に定義が必要)
 ================================================================ */
-const CAD = {
+var CAD = {
   active:  false,
   points:  [],   // [{px, py, cx, cy}] px/py = canvas pixels, cx/cy = math coords
   hover:   null, // hover preview point
@@ -1928,6 +2063,37 @@ function cadPixToMath(px, py) {
     cx: (px - p.x) / CAD.scale,
     cy: -(py - p.y) / CAD.scale,
   };
+}
+
+function cadMathToPoint(cx, cy) {
+  const p = pivot();
+  return {
+    cx,
+    cy,
+    px: p.x + cx * CAD.scale,
+    py: p.y - cy * CAD.scale,
+  };
+}
+
+function cadShowPointButtons() {
+  const hasPoints = CAD.points.length > 0;
+  document.getElementById('cadUndoBtn').style.display = hasPoints ? '' : 'none';
+  document.getElementById('cadClearBtn').style.display = hasPoints ? '' : 'none';
+  document.getElementById('cadPanel').style.display = (CAD.active || hasPoints) ? '' : 'none';
+}
+
+function cadAddPointFromMath(cx, cy) {
+  if (!isFinite(cx) || !isFinite(cy)) { showToast('X座標とY座標を入力してください'); return; }
+  CAD.points.push(cadMathToPoint(cx, cy));
+  renderCadPanel();
+  drawAll();
+  cadShowPointButtons();
+}
+
+function cadAddPointFromInputs() {
+  const x = parseFloat(document.getElementById('cadNumX').value);
+  const y = parseFloat(document.getElementById('cadNumY').value);
+  cadAddPointFromMath(x, y);
 }
 
 /* --- イベントからキャンバス内ピクセル座標を取得 --- */
@@ -2203,6 +2369,17 @@ function setCadMode(active) {
 }
 
 document.getElementById('cadBtn').addEventListener('click', () => setCadMode(!CAD.active));
+document.getElementById('cadAddNumBtn').addEventListener('click', cadAddPointFromInputs);
+document.getElementById('cadAddOriginBtn').addEventListener('click', () => cadAddPointFromMath(0, 0));
+document.getElementById('cadAddResultBtn').addEventListener('click', () => {
+  if (!S.hasResult) { showToast('先に計算してください'); return; }
+  cadAddPointFromMath(S.X, S.Y);
+});
+document.querySelectorAll('[data-cad-input]').forEach(inp => {
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter') cadAddPointFromInputs();
+  });
+});
 
 /* 「戻す」: 最後の点を削除 */
 document.getElementById('cadUndoBtn').addEventListener('click', () => {
@@ -2260,9 +2437,8 @@ document.addEventListener('keydown', e => {
    → CAD.scale[px/単位] = scaledR / S.R
 ---------------------------------------------------------------- */
 function cadComputeScale() {
-  const scaledR = Math.min(CW(), CH()) * 0.40 * 0.82;
-  const r = S.R > 0 ? S.R : 100;   // 計算前は R=100 相当
-  return scaledR / r;
+  const maxR = Math.min(CW(), CH()) * 0.40;
+  return canvasUnitScale(maxR);
 }
 
 /* スケール更新 + 既存点を数学座標→ピクセルに再投影 */
@@ -2278,8 +2454,8 @@ function cadRecomputeScale() {
   /* 表示更新 */
   const info = document.getElementById('cadScaleInfo');
   if (info) {
-    const r = S.R > 0 ? S.R : 100;
-    const label = S.R > 0 ? `R=${r.toFixed(1)}に連動` : `R=100基準(未計算)`;
+    const r = geometryRadiusValue();
+    const label = S.hasResult ? `R=${formatGridNumber(r)}に連動` : `R=${formatGridNumber(r)}基準`;
     info.textContent = `📐 ${label} / 1単位=${newScale.toFixed(2)}px`;
   }
   if (CAD.points.length > 0) renderCadPanel();
